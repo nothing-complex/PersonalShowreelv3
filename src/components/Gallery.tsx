@@ -10,16 +10,13 @@ export const Gallery = () => {
   const [images, setImages] = useState<Image[]>([]);
 
   useEffect(() => {
-    // In a real implementation, this would dynamically fetch from a folder
-    // For now, we'll use the sample images
-    const sampleImages = [
-      { src: "/gallery/image1.jpg", alt: "Portrait in cafe" },
-      { src: "/gallery/image2.jpg", alt: "Corporate portrait" },
-      { src: "/gallery/image3.jpg", alt: "Cafe staff" },
-      { src: "/gallery/image4.jpg", alt: "Group portrait" },
-      { src: "/gallery/image5.jpg", alt: "Protest documentation" }
-    ];
-    setImages(sampleImages);
+    // Create array of 30 images
+    const imageArray = Array.from({ length: 30 }, (_, i) => ({
+      src: `/gallery/image${i + 1}.jpg`,
+      // Maintain the same alt text pattern, cycling through descriptions if needed
+      alt: `Image ${i + 1}`
+    }));
+    setImages(imageArray);
   }, []);
 
   const container = {
@@ -65,6 +62,11 @@ export const Gallery = () => {
             loading="lazy"
             whileHover={{ scale: 1.05 }}
             transition={{ duration: 0.4 }}
+            onError={(e) => {
+              // Remove the image from the array if it fails to load
+              const target = e.target as HTMLImageElement;
+              setImages(current => current.filter(img => img.src !== target.src));
+            }}
           />
         </motion.div>
       ))}
