@@ -10,38 +10,13 @@ export const Gallery = () => {
   const [images, setImages] = useState<Image[]>([]);
 
   useEffect(() => {
-    const loadImages = async () => {
-      const foundImages: Image[] = [];
-      let index = 1;
-      let consecutiveFailures = 0;
-      
-      // Keep trying to load images until we hit 3 consecutive missing files
-      while (consecutiveFailures < 3) {
-        const src = `/gallery/image${index}.jpg`;
-        
-        try {
-          // Try to load the image
-          const response = await fetch(src);
-          if (response.ok) {
-            foundImages.push({
-              src,
-              alt: `Gallery image ${index}`
-            });
-            consecutiveFailures = 0;  // Reset counter on success
-          } else {
-            consecutiveFailures++;
-          }
-        } catch {
-          consecutiveFailures++;
-        }
-        
-        index++;
-      }
-      
-      setImages(foundImages);
-    };
-
-    loadImages();
+    // Create array of 30 images
+    const imageArray = Array.from({ length: 30 }, (_, i) => ({
+      src: `/gallery/image${i + 1}.jpg`,
+      // Maintain the same alt text pattern, cycling through descriptions if needed
+      alt: `Image ${i + 1}`
+    }));
+    setImages(imageArray);
   }, []);
 
   const container = {
@@ -72,21 +47,26 @@ export const Gallery = () => {
       initial="hidden"
       whileInView="show"
       viewport={{ once: true }}
-      className="columns-1 md:columns-2 lg:columns-3 gap-4 p-4 space-y-4"
+      className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 p-4"
     >
       {images.map((image, index) => (
         <motion.div
           key={index}
           variants={item}
-          className="group relative break-inside-avoid overflow-hidden rounded-lg bg-gray-100"
+          className="group relative aspect-[4/3] overflow-hidden rounded-lg bg-gray-100"
         >
           <motion.img
             src={image.src}
             alt={image.alt}
-            className="w-full h-auto object-cover transition-transform duration-500 group-hover:scale-105"
+            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
             loading="lazy"
             whileHover={{ scale: 1.05 }}
             transition={{ duration: 0.4 }}
+            onError={(e) => {
+              // Remove the image from the array if it fails to load
+              const target = e.target as HTMLImageElement;
+              setImages(current => current.filter(img => img.src !== target.src));
+            }}
           />
         </motion.div>
       ))}
