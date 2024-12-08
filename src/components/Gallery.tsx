@@ -72,18 +72,18 @@ export const Gallery = () => {
       initial="hidden"
       whileInView="show"
       viewport={{ once: true }}
-      className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 p-4"
+      className="columns-1 md:columns-2 lg:columns-3 gap-4 p-4 space-y-4"
     >
       {images.map((image, index) => (
         <motion.div
           key={index}
           variants={item}
-          className="group relative aspect-[4/3] overflow-hidden rounded-lg bg-gray-100"
+          className="group relative break-inside-avoid overflow-hidden rounded-lg bg-gray-100"
         >
           <motion.img
             src={image.src}
             alt={image.alt}
-            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+            className="w-full h-auto object-cover transition-transform duration-500 group-hover:scale-105"
             loading="lazy"
             whileHover={{ scale: 1.05 }}
             transition={{ duration: 0.4 }}
