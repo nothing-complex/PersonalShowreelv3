@@ -10,13 +10,38 @@ export const Gallery = () => {
   const [images, setImages] = useState<Image[]>([]);
 
   useEffect(() => {
-    // Create array of 30 images
-    const imageArray = Array.from({ length: 30 }, (_, i) => ({
-      src: `/gallery/image${i + 1}.jpg`,
-      // Maintain the same alt text pattern, cycling through descriptions if needed
-      alt: `Image ${i + 1}`
-    }));
-    setImages(imageArray);
+    const loadImages = async () => {
+      const foundImages: Image[] = [];
+      let index = 1;
+      let consecutiveFailures = 0;
+      
+      // Keep trying to load images until we hit 3 consecutive missing files
+      while (consecutiveFailures < 3) {
+        const src = `/gallery/image${index}.jpg`;
+        
+        try {
+          // Try to load the image
+          const response = await fetch(src);
+          if (response.ok) {
+            foundImages.push({
+              src,
+              alt: `Gallery image ${index}`
+            });
+            consecutiveFailures = 0;  // Reset counter on success
+          } else {
+            consecutiveFailures++;
+          }
+        } catch {
+          consecutiveFailures++;
+        }
+        
+        index++;
+      }
+      
+      setImages(foundImages);
+    };
+
+    loadImages();
   }, []);
 
   const container = {
@@ -62,11 +87,6 @@ export const Gallery = () => {
             loading="lazy"
             whileHover={{ scale: 1.05 }}
             transition={{ duration: 0.4 }}
-            onError={(e) => {
-              // Remove the image from the array if it fails to load
-              const target = e.target as HTMLImageElement;
-              setImages(current => current.filter(img => img.src !== target.src));
-            }}
           />
         </motion.div>
       ))}
